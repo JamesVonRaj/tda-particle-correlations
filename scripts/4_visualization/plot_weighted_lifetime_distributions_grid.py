@@ -138,6 +138,7 @@ def plot_grid_weighted_lifetime_distributions(homology_dim='h0', base_dir=ENSEMB
                                                output_dir=OUTPUT_DIR):
     """
     Create a 3x3 grid plot of weighted lifetime distributions (KDE with stats).
+    Uses consistent X and Y axis limits across all subplots for easy comparison.
     """
     os.makedirs(output_dir, exist_ok=True)
 
@@ -180,40 +181,55 @@ def plot_grid_weighted_lifetime_distributions(homology_dim='h0', base_dir=ENSEMB
 
     x_range = np.linspace(0, x_max, 500)
 
-    # Second pass: plot
+    # Second pass: compute all KDEs and find global y_max
+    all_densities = {}
+    y_max = 0
+    for i, r0 in enumerate(R0_VALUES):
+        for j, c in enumerate(C_VALUES):
+            lifetimes, weights = all_data[(i, j)]
+            if lifetimes is not None and len(lifetimes) >= 10:
+                try:
+                    density = weighted_kde(lifetimes, weights, x_range)
+                    all_densities[(i, j)] = density
+                    y_max = max(y_max, np.max(density))
+                except:
+                    all_densities[(i, j)] = None
+            else:
+                all_densities[(i, j)] = None
+
+    # Add 5% padding to y_max
+    y_max = y_max * 1.05
+
+    # Third pass: plot with consistent axes
     for i, r0 in enumerate(R0_VALUES):
         for j, c in enumerate(C_VALUES):
             ax = axes[i, j]
             lifetimes, weights = all_data[(i, j)]
+            density = all_densities[(i, j)]
 
-            if lifetimes is None or len(lifetimes) < 10:
+            if density is None:
                 ax.text(0.5, 0.5, 'Insufficient Data', transform=ax.transAxes,
                        ha='center', va='center', fontsize=12, color='red')
                 ax.set_xlim(0, x_max)
+                ax.set_ylim(0, y_max)
                 continue
 
-            try:
-                density = weighted_kde(lifetimes, weights, x_range)
+            ax.plot(x_range, density, color=kde_color, linewidth=2,
+                   label=f'{homology_dim.upper()}')
+            ax.fill_between(x_range, density, alpha=0.3, color=fill_color)
 
-                ax.plot(x_range, density, color=kde_color, linewidth=2,
-                       label=f'{homology_dim.upper()}')
-                ax.fill_between(x_range, density, alpha=0.3, color=fill_color)
+            w_mean = weighted_mean(lifetimes, weights)
+            ax.axvline(w_mean, color='red', linestyle='--', linewidth=1.5,
+                      alpha=0.7, label=f'W.Mean: {w_mean:.3f}')
 
-                w_mean = weighted_mean(lifetimes, weights)
-                ax.axvline(w_mean, color='red', linestyle='--', linewidth=1.5,
-                          alpha=0.7, label=f'W.Mean: {w_mean:.3f}')
-
-                w_std = weighted_std(lifetimes, weights)
-                stats_text = f'n = {len(lifetimes):,}\nw.mu = {w_mean:.4f}\nw.sigma = {w_std:.4f}'
-                ax.text(0.97, 0.97, stats_text, transform=ax.transAxes,
-                       fontsize=8, verticalalignment='top', horizontalalignment='right',
-                       bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
-
-            except Exception as e:
-                ax.text(0.5, 0.5, f'KDE Error', transform=ax.transAxes,
-                       ha='center', va='center', fontsize=10, color='red')
+            w_std = weighted_std(lifetimes, weights)
+            stats_text = f'n = {len(lifetimes):,}\nw.mu = {w_mean:.4f}\nw.sigma = {w_std:.4f}'
+            ax.text(0.97, 0.97, stats_text, transform=ax.transAxes,
+                   fontsize=8, verticalalignment='top', horizontalalignment='right',
+                   bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
 
             ax.set_xlim(0, x_max)
+            ax.set_ylim(0, y_max)
             ax.set_xlabel('Lifetime', fontsize=11)
             ax.set_ylabel('Weighted Density', fontsize=11)
             ax.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
@@ -242,6 +258,7 @@ def plot_grid_with_reference_style(homology_dim='h0', base_dir=ENSEMBLE_BASE_DIR
                                     output_dir=OUTPUT_DIR):
     """
     Create a 3x3 grid plot matching the reference image style (weighted).
+    Uses consistent X and Y axis limits across all subplots for easy comparison.
     """
     os.makedirs(output_dir, exist_ok=True)
 
@@ -281,36 +298,50 @@ def plot_grid_with_reference_style(homology_dim='h0', base_dir=ENSEMBLE_BASE_DIR
     x_max = min(np.percentile(all_lifetimes, 99) if all_lifetimes else 3.0, 3.0)
     x_range = np.linspace(0, x_max, 500)
 
+    # Compute all KDEs first to find global y_max
+    all_densities = {}
+    y_max = 0
+    for i, r0 in enumerate(R0_VALUES):
+        for j, c in enumerate(C_VALUES):
+            lifetimes, weights = all_data[(i, j)]
+            if lifetimes is not None and len(lifetimes) >= 10:
+                try:
+                    density = weighted_kde(lifetimes, weights, x_range)
+                    all_densities[(i, j)] = density
+                    y_max = max(y_max, np.max(density))
+                except:
+                    all_densities[(i, j)] = None
+            else:
+                all_densities[(i, j)] = None
+
+    y_max = y_max * 1.05  # Add 5% padding
+
+    # Plot with consistent axes
     for i, r0 in enumerate(R0_VALUES):
         for j, c in enumerate(C_VALUES):
             ax = fig.add_subplot(gs[i, j])
             lifetimes, weights = all_data[(i, j)]
+            density = all_densities[(i, j)]
 
             ax.set_title(f'r_0 = {r0}, c = {c}', fontsize=11, pad=5)
 
-            if lifetimes is None or len(lifetimes) < 10:
+            if density is None:
                 ax.text(0.5, 0.5, 'No Data', transform=ax.transAxes,
                        ha='center', va='center', fontsize=12)
                 ax.set_xlim(0, x_max)
+                ax.set_ylim(0, y_max)
                 ax.set_xlabel('Lifetime', fontsize=11)
                 ax.set_ylabel('Weighted Density', fontsize=11)
                 continue
 
-            try:
-                density = weighted_kde(lifetimes, weights, x_range)
+            ax.plot(x_range, density, color=color, linewidth=2,
+                   label=f'{homology_label}')
+            ax.fill_between(x_range, density, alpha=0.25, color=color)
 
-                ax.plot(x_range, density, color=color, linewidth=2,
-                       label=f'{homology_label}')
-                ax.fill_between(x_range, density, alpha=0.25, color=color)
-
-                ax.legend(loc='upper right', fontsize=9)
-
-            except Exception as e:
-                ax.text(0.5, 0.5, 'KDE Error', transform=ax.transAxes,
-                       ha='center', va='center', fontsize=10, color='red')
+            ax.legend(loc='upper right', fontsize=9)
 
             ax.set_xlim(0, x_max)
-            ax.set_ylim(bottom=0)
+            ax.set_ylim(0, y_max)
             ax.set_xlabel('Lifetime', fontsize=11)
             ax.set_ylabel('Weighted Density', fontsize=11)
             ax.grid(True, alpha=0.3)
@@ -327,6 +358,7 @@ def plot_grid_weighted_histograms(homology_dim='h0', base_dir=ENSEMBLE_BASE_DIR,
                                    output_dir=OUTPUT_DIR, n_bins=50):
     """
     Create a 3x3 grid plot with weighted histograms.
+    Uses consistent X and Y axis limits across all subplots for easy comparison.
     """
     os.makedirs(output_dir, exist_ok=True)
 
@@ -368,6 +400,18 @@ def plot_grid_weighted_histograms(homology_dim='h0', base_dir=ENSEMBLE_BASE_DIR,
     x_max = min(np.percentile(all_lifetimes, 99) if all_lifetimes else 3.0, 3.0)
     bins = np.linspace(0, x_max, n_bins + 1)
 
+    # First pass: compute histograms to find global y_max
+    y_max = 0
+    for i, r0 in enumerate(R0_VALUES):
+        for j, c in enumerate(C_VALUES):
+            lifetimes, weights = all_data[(i, j)]
+            if lifetimes is not None and len(lifetimes) >= 10:
+                counts, _ = np.histogram(lifetimes, bins=bins, weights=weights)
+                y_max = max(y_max, np.max(counts))
+
+    y_max = y_max * 1.05  # Add 5% padding
+
+    # Second pass: plot with consistent axes
     for i, r0 in enumerate(R0_VALUES):
         for j, c in enumerate(C_VALUES):
             ax = fig.add_subplot(gs[i, j])
@@ -379,6 +423,7 @@ def plot_grid_weighted_histograms(homology_dim='h0', base_dir=ENSEMBLE_BASE_DIR,
                 ax.text(0.5, 0.5, 'No Data', transform=ax.transAxes,
                        ha='center', va='center', fontsize=12)
                 ax.set_xlim(0, x_max)
+                ax.set_ylim(0, y_max)
                 ax.set_xlabel('Lifetime', fontsize=11)
                 ax.set_ylabel('Weighted Count', fontsize=11)
                 continue
@@ -397,7 +442,7 @@ def plot_grid_weighted_histograms(homology_dim='h0', base_dir=ENSEMBLE_BASE_DIR,
                    bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
 
             ax.set_xlim(0, x_max)
-            ax.set_ylim(bottom=0)
+            ax.set_ylim(0, y_max)
             ax.set_xlabel('Lifetime', fontsize=11)
             ax.set_ylabel('Weighted Count', fontsize=11)
             ax.grid(True, alpha=0.3, axis='y')
@@ -415,6 +460,7 @@ def plot_grid_weighted_histograms_density(homology_dim='h0', base_dir=ENSEMBLE_B
                                            output_dir=OUTPUT_DIR, n_bins=50):
     """
     Create a 3x3 grid plot with weighted density-normalized histograms.
+    Uses consistent X and Y axis limits across all subplots for easy comparison.
     """
     os.makedirs(output_dir, exist_ok=True)
 
@@ -456,6 +502,18 @@ def plot_grid_weighted_histograms_density(homology_dim='h0', base_dir=ENSEMBLE_B
     x_max = min(np.percentile(all_lifetimes, 99) if all_lifetimes else 3.0, 3.0)
     bins = np.linspace(0, x_max, n_bins + 1)
 
+    # First pass: compute density histograms to find global y_max
+    y_max = 0
+    for i, r0 in enumerate(R0_VALUES):
+        for j, c in enumerate(C_VALUES):
+            lifetimes, weights = all_data[(i, j)]
+            if lifetimes is not None and len(lifetimes) >= 10:
+                counts, bin_edges = np.histogram(lifetimes, bins=bins, weights=weights, density=True)
+                y_max = max(y_max, np.max(counts))
+
+    y_max = y_max * 1.05  # Add 5% padding
+
+    # Second pass: plot with consistent axes
     for i, r0 in enumerate(R0_VALUES):
         for j, c in enumerate(C_VALUES):
             ax = fig.add_subplot(gs[i, j])
@@ -467,6 +525,7 @@ def plot_grid_weighted_histograms_density(homology_dim='h0', base_dir=ENSEMBLE_B
                 ax.text(0.5, 0.5, 'No Data', transform=ax.transAxes,
                        ha='center', va='center', fontsize=12)
                 ax.set_xlim(0, x_max)
+                ax.set_ylim(0, y_max)
                 ax.set_xlabel('Lifetime', fontsize=11)
                 ax.set_ylabel('Weighted Density', fontsize=11)
                 continue
@@ -485,7 +544,7 @@ def plot_grid_weighted_histograms_density(homology_dim='h0', base_dir=ENSEMBLE_B
                    bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
 
             ax.set_xlim(0, x_max)
-            ax.set_ylim(bottom=0)
+            ax.set_ylim(0, y_max)
             ax.set_xlabel('Lifetime', fontsize=11)
             ax.set_ylabel('Weighted Density', fontsize=11)
             ax.grid(True, alpha=0.3, axis='y')
@@ -502,6 +561,7 @@ def plot_grid_weighted_histograms_density(homology_dim='h0', base_dir=ENSEMBLE_B
 def plot_h0_vs_h1_weighted_lifetime_comparison(base_dir=ENSEMBLE_BASE_DIR, output_dir=OUTPUT_DIR):
     """
     Create a 3x3 grid comparing weighted H0 and H1 lifetime distributions on the same plot.
+    Uses consistent X and Y axis limits across all subplots for easy comparison.
     """
     os.makedirs(output_dir, exist_ok=True)
 
@@ -544,38 +604,64 @@ def plot_h0_vs_h1_weighted_lifetime_comparison(base_dir=ENSEMBLE_BASE_DIR, outpu
     x_max = min(np.percentile(all_lifetimes, 99) if all_lifetimes else 3.0, 3.0)
     x_range = np.linspace(0, x_max, 500)
 
+    # Compute all KDEs first to find global y_max
+    all_h0_densities = {}
+    all_h1_densities = {}
+    y_max = 0
+    for i, r0 in enumerate(R0_VALUES):
+        for j, c in enumerate(C_VALUES):
+            h0_lifetimes, h0_weights = all_h0_data[(i, j)]
+            h1_lifetimes, h1_weights = all_h1_data[(i, j)]
+
+            if h0_lifetimes is not None and len(h0_lifetimes) > 10:
+                try:
+                    density_h0 = weighted_kde(h0_lifetimes, h0_weights, x_range)
+                    all_h0_densities[(i, j)] = density_h0
+                    y_max = max(y_max, np.max(density_h0))
+                except:
+                    all_h0_densities[(i, j)] = None
+            else:
+                all_h0_densities[(i, j)] = None
+
+            if h1_lifetimes is not None and len(h1_lifetimes) > 10:
+                try:
+                    density_h1 = weighted_kde(h1_lifetimes, h1_weights, x_range)
+                    all_h1_densities[(i, j)] = density_h1
+                    y_max = max(y_max, np.max(density_h1))
+                except:
+                    all_h1_densities[(i, j)] = None
+            else:
+                all_h1_densities[(i, j)] = None
+
+    y_max = y_max * 1.05  # Add 5% padding
+
+    # Plot with consistent axes
     for i, r0 in enumerate(R0_VALUES):
         for j, c in enumerate(C_VALUES):
             ax = fig.add_subplot(gs[i, j])
             h0_lifetimes, h0_weights = all_h0_data[(i, j)]
             h1_lifetimes, h1_weights = all_h1_data[(i, j)]
+            density_h0 = all_h0_densities[(i, j)]
+            density_h1 = all_h1_densities[(i, j)]
 
             ax.set_title(f'r_0 = {r0}, c = {c}', fontsize=11, pad=5)
 
             # Plot H0 (blue)
-            if h0_lifetimes is not None and len(h0_lifetimes) > 10:
-                try:
-                    density_h0 = weighted_kde(h0_lifetimes, h0_weights, x_range)
-                    w_mean_h0 = weighted_mean(h0_lifetimes, h0_weights)
-                    ax.plot(x_range, density_h0, color='blue', linewidth=2,
-                           label=f'H0 (w.mu={w_mean_h0:.3f})')
-                    ax.fill_between(x_range, density_h0, alpha=0.2, color='blue')
-                except:
-                    pass
+            if density_h0 is not None:
+                w_mean_h0 = weighted_mean(h0_lifetimes, h0_weights)
+                ax.plot(x_range, density_h0, color='blue', linewidth=2,
+                       label=f'H0 (w.mu={w_mean_h0:.3f})')
+                ax.fill_between(x_range, density_h0, alpha=0.2, color='blue')
 
             # Plot H1 (green)
-            if h1_lifetimes is not None and len(h1_lifetimes) > 10:
-                try:
-                    density_h1 = weighted_kde(h1_lifetimes, h1_weights, x_range)
-                    w_mean_h1 = weighted_mean(h1_lifetimes, h1_weights)
-                    ax.plot(x_range, density_h1, color='green', linewidth=2,
-                           label=f'H1 (w.mu={w_mean_h1:.3f})')
-                    ax.fill_between(x_range, density_h1, alpha=0.2, color='green')
-                except:
-                    pass
+            if density_h1 is not None:
+                w_mean_h1 = weighted_mean(h1_lifetimes, h1_weights)
+                ax.plot(x_range, density_h1, color='green', linewidth=2,
+                       label=f'H1 (w.mu={w_mean_h1:.3f})')
+                ax.fill_between(x_range, density_h1, alpha=0.2, color='green')
 
             ax.set_xlim(0, x_max)
-            ax.set_ylim(bottom=0)
+            ax.set_ylim(0, y_max)
             ax.set_xlabel('Lifetime', fontsize=11)
             ax.set_ylabel('Weighted Density', fontsize=11)
             ax.grid(True, alpha=0.3)
