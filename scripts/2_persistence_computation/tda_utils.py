@@ -11,6 +11,7 @@ constituting a topological feature.
 import gudhi
 import numpy as np
 import sys
+from collections import defaultdict, deque
 from scipy.spatial.distance import pdist, squareform
 
 
@@ -58,31 +59,120 @@ class UnionFind:
         return death_info
 
 
+def build_edge_list(simplex_tree):
+    """
+    Extract all edges from simplex tree with their filtration values.
+    Returns a sorted list of (filtration, vertex1, vertex2) tuples.
+    """
+    edges = []
+    for simplex, filt in simplex_tree.get_filtration():
+        if len(simplex) == 2:
+            edges.append((filt, simplex[0], simplex[1]))
+    edges.sort()  # Sort by filtration value
+    return edges
+
+
+def find_cycle_at_birth(edge_list, birth_edge, birth_filt):
+    """
+    Find the cycle (loop) that forms when birth_edge is added at birth_filt.
+
+    When an H1 feature is born, it means the birth_edge completes a cycle.
+    We find this cycle by doing BFS from one endpoint of the birth_edge to
+    the other, using only edges that existed before the birth_edge was added.
+
+    Args:
+        edge_list: Pre-sorted list of (filt, v1, v2) tuples from build_edge_list()
+        birth_edge: The edge (as list of 2 vertex indices) that creates the cycle
+        birth_filt: The filtration value at which the birth_edge appears
+
+    Returns:
+        list: Ordered list of vertex indices forming the cycle, or None if not found
+    """
+    v1, v2 = birth_edge
+    birth_edge_set = set(birth_edge)
+
+    # Build graph from pre-computed edge list
+    # Only include edges with filt < birth_filt, or equal but not the birth edge
+    graph = defaultdict(list)
+
+    for filt, a, b in edge_list:
+        if filt > birth_filt:
+            break  # Edge list is sorted, so we can stop here
+        if filt < birth_filt or {a, b} != birth_edge_set:
+            graph[a].append(b)
+            graph[b].append(a)
+
+    # BFS from v1 to v2 to find the shortest path
+    queue = deque([(v1, [v1])])
+    visited = {v1}
+
+    while queue:
+        current, path = queue.popleft()
+        if current == v2:
+            return path  # Found path; this + birth_edge forms the cycle
+        for neighbor in graph[current]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append((neighbor, path + [neighbor]))
+
+    return None  # No path found (shouldn't happen for valid H1)
+
+
+def polygon_area(vertices):
+    """
+    Compute the area of a polygon using the shoelace formula.
+
+    Args:
+        vertices: np.ndarray of shape (n, 2) with ordered polygon vertices
+
+    Returns:
+        float: Area of the polygon (always positive)
+    """
+    n = len(vertices)
+    if n < 3:
+        return 0.0
+
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i, 0] * vertices[j, 1]
+        area -= vertices[j, 0] * vertices[i, 1]
+
+    return abs(area) / 2.0
+
+
 def compute_rips_persistence_with_point_counts(points, max_edge_length):
     """
-    Computes the Vietoris-Rips persistence for H0 and H1, including a count
-    of the number of points associated with each topological feature at its death.
+    Computes the Vietoris-Rips persistence for H0 and H1, including additional
+    geometric information about each topological feature.
+
+    For H0 (connected components): tracks the number of points merged.
+    For H1 (loops): tracks the number of vertices in the cycle and the
+    area enclosed by the cycle at birth time.
 
     This function is optimized to only compute simplices up to dimension 2,
     as this is all that is required for H0 (dim 0) and H1 (dim 1).
 
     Args:
-        points (np.ndarray): 
-            A NumPy array of shape (n_points, n_dims),
-            e.g., (100, 2) for 100 2D points.
-        
-        max_edge_length (float): 
-            The maximum edge length to consider for the Rips complex. 
-            This is a critical parameter. The maximum filtration value
-            (radius) in the persistence diagram will be (max_edge_length / 2).
+        points (np.ndarray):
+            A NumPy array of shape (n_points, 2) for 2D points.
+            Note: cycle area computation requires 2D points.
+
+        max_edge_length (float):
+            The maximum edge length (distance) to consider for the Rips complex.
+            This is the filtration cutoff - edges between points with distance
+            greater than this value will not be included. The maximum filtration
+            value in the persistence diagram will be max_edge_length.
             You must tune this based on the scale of your point data.
 
     Returns:
         dict: Dictionary containing:
             - 'h0' (np.ndarray): Array of shape (n_features, 3) for H0.
-                Each row is [birth_radius, death_radius, num_points].
-            - 'h1' (np.ndarray): Array of shape (m_features, 3) for H1.
-                Each row is [birth_radius, death_radius, num_points].
+                Each row is [birth, death, num_points].
+            - 'h1' (np.ndarray): Array of shape (m_features, 4) for H1.
+                Each row is [birth, death, num_vertices, cycle_area].
+                num_vertices: number of points forming the cycle at birth.
+                cycle_area: area enclosed by the cycle polygon at birth.
             - 'n_points' (int): Total number of points in the input.
             - 'max_edge_length' (float): The max_edge_length parameter used.
             - 'empty' (bool): Whether the input was empty.
@@ -96,7 +186,7 @@ def compute_rips_persistence_with_point_counts(points, max_edge_length):
     if n_points == 0:
         return {
             'h0': np.empty((0, 3)),
-            'h1': np.empty((0, 3)),
+            'h1': np.empty((0, 4)),  # 4 columns: birth, death, num_vertices, cycle_area
             'n_points': 0,
             'max_edge_length': max_edge_length,
             'empty': True
@@ -147,10 +237,10 @@ def compute_rips_persistence_with_point_counts(points, max_edge_length):
     print(f"H0: Found {len(h0_data)} finite features")
     
     # ===================================================================
-    # H1 COMPUTATION (Loops) - Using GUDHI with Cochains
+    # H1 COMPUTATION (Loops) - Using GUDHI with cycle area computation
     # ===================================================================
     print(f"Computing H1 (loops) using GUDHI...")
-    
+
     # Build the Vietoris-Rips Complex
     rips_complex = gudhi.RipsComplex(
         points=points,
@@ -162,7 +252,11 @@ def compute_rips_persistence_with_point_counts(points, max_edge_length):
 
     # Compute Persistence
     simplex_tree.compute_persistence()
-    
+
+    # Pre-build sorted edge list for efficient cycle finding
+    edge_list = build_edge_list(simplex_tree)
+    print(f"Built edge list with {len(edge_list)} edges")
+
     # Get persistence pairs (birth and death simplices)
     pairs = simplex_tree.persistence_pairs()
 
@@ -172,35 +266,41 @@ def compute_rips_persistence_with_point_counts(points, max_edge_length):
     for birth_simplex, death_simplex in pairs:
         # The dimension of the feature is determined by the birth simplex dimension
         birth_dim = len(birth_simplex) - 1
-        
+
         # Only process H1 features (dim=1, born from edges)
         if birth_dim != 1:
             continue
-        
+
         # Check if it's a finite feature (has a death simplex)
         if len(death_simplex) == 0:
             continue
-        
+
         # Get birth and death times from the filtration values
         birth_time = simplex_tree.filtration(birth_simplex)
         death_time = simplex_tree.filtration(death_simplex)
-        
-        # For H1 (loops), collect all unique vertices involved
-        # We need to trace the cycle, but as a simple approximation,
-        # we can collect vertices from birth and death simplices
-        feature_vertices = set(birth_simplex)
-        feature_vertices.update(death_simplex)
-        
-        num_points_in_feature = len(feature_vertices)
-        
-        h1_data.append([birth_time, death_time, num_points_in_feature])
+
+        # Find the cycle that forms at birth time (using pre-built edge list)
+        cycle_vertex_indices = find_cycle_at_birth(edge_list, birth_simplex, birth_time)
+
+        if cycle_vertex_indices is not None:
+            num_vertices = len(cycle_vertex_indices)
+            cycle_coords = points[cycle_vertex_indices]
+            cycle_area = polygon_area(cycle_coords)
+        else:
+            # Fallback: use vertices from birth and death simplices
+            feature_vertices = set(birth_simplex)
+            feature_vertices.update(death_simplex)
+            num_vertices = len(feature_vertices)
+            cycle_area = 0.0  # Cannot compute area without proper cycle
+
+        h1_data.append([birth_time, death_time, num_vertices, cycle_area])
 
     # Convert to numpy array
     if not h1_data:
-        h1_array = np.empty((0, 3))
+        h1_array = np.empty((0, 4))
     else:
         h1_array = np.array(h1_data)
-    
+
     print(f"H1: Found {len(h1_data)} finite features")
     print("--- TDA Computation Finished ---")
     

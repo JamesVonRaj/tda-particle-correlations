@@ -29,8 +29,8 @@ ENSEMBLE_BASE_DIR = "../../data/grid_ensemble_data"
 # --- TDA Parameters ---
 # Since data is normalized to unit intensity, we use a consistent max_edge_length
 # For unit intensity, typical nearest-neighbor distance ~ 1
-# We look at structures up to radius 2.5 (edges up to 5.0)
-MAX_EDGE_LENGTH = 5.0
+# We use 10.0 to capture long-range H1 features (loops) without truncation
+MAX_EDGE_LENGTH = 10.0
 
 # ==============================================================================
 # Helper Functions

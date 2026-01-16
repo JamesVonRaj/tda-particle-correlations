@@ -1,7 +1,7 @@
 {
     "config_name": "r0_1.0_c_10",
     "n_samples": 50,
-    "max_edge_length": 5.0,
+    "max_edge_length": 10.0,
     "n_points": {
         "mean": 1855.94,
         "std": 115.18114602659588,
@@ -15,8 +15,8 @@
         "max": 2136
     },
     "h1_features": {
-        "mean": 479.02,
-        "std": 33.79200497159054,
+        "mean": 479.12,
+        "std": 33.80925317128433,
         "min": 413,
         "max": 589
     }
