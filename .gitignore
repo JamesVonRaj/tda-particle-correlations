@@ -46,14 +46,15 @@ wheels/
 Thumbs.db
 
 # Project specific
-outputs/figures/*.png
-outputs/figures/*.pdf
+outputs/figures/**/*.png
+outputs/figures/**/*.pdf
 outputs/analysis_results/*.json
 data/ensemble_data/*/sample_*.npy
 
 # Keep structure but ignore data files
 !data/ensemble_data/README.json
 !outputs/figures/.gitkeep
+!outputs/figures/**/.gitkeep
 !outputs/analysis_results/.gitkeep
 
 # Logs
