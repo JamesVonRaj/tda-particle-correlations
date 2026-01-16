@@ -1,0 +1,73 @@
+{
+    "description": "3\u00d73 Grid Ensemble: r0 \u00d7 c parameter combinations",
+    "normalization": {
+        "method": "unit_intensity",
+        "intensity": 1.0,
+        "description": "All point patterns normalized to have intensity = 1 point per unit area"
+    },
+    "grid_parameters": {
+        "r0_values": [
+            0.1,
+            0.5,
+            1.0
+        ],
+        "c_values": [
+            5,
+            10,
+            50
+        ],
+        "n_configurations": 9
+    },
+    "simulation_parameters": {
+        "lambda_parent": 0.5,
+        "initial_window_size": 20,
+        "n_samples_per_config": 50
+    },
+    "configurations": [
+        {
+            "r0": 0.1,
+            "c": 5,
+            "directory": "r0_0.1_c_5"
+        },
+        {
+            "r0": 0.1,
+            "c": 10,
+            "directory": "r0_0.1_c_10"
+        },
+        {
+            "r0": 0.1,
+            "c": 50,
+            "directory": "r0_0.1_c_50"
+        },
+        {
+            "r0": 0.5,
+            "c": 5,
+            "directory": "r0_0.5_c_5"
+        },
+        {
+            "r0": 0.5,
+            "c": 10,
+            "directory": "r0_0.5_c_10"
+        },
+        {
+            "r0": 0.5,
+            "c": 50,
+            "directory": "r0_0.5_c_50"
+        },
+        {
+            "r0": 1.0,
+            "c": 5,
+            "directory": "r0_1.0_c_5"
+        },
+        {
+            "r0": 1.0,
+            "c": 10,
+            "directory": "r0_1.0_c_10"
+        },
+        {
+            "r0": 1.0,
+            "c": 50,
+            "directory": "r0_1.0_c_50"
+        }
+    ]
+}

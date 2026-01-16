@@ -1,0 +1,29 @@
+{
+    "configuration_name": "r0_0.1_c_10",
+    "description": "r0=0.1, c=10 (normalized to unit intensity)",
+    "parameters": {
+        "r0": 0.1,
+        "c": 10,
+        "lambda_parent": 0.5,
+        "initial_window_size": 20
+    },
+    "normalization": {
+        "method": "unit_intensity",
+        "description": "Coordinates scaled so intensity = 1 point per unit area"
+    },
+    "n_samples": 50,
+    "statistics": {
+        "n_points": {
+            "mean": 1954.78,
+            "std": 128.93227524557224,
+            "min": 1507,
+            "max": 2168
+        },
+        "normalized_box_size": {
+            "mean": 44.18782561888166,
+            "std": 1.4886460544081324,
+            "min": 38.82009788756334,
+            "max": 46.561786907291264
+        }
+    }
+}

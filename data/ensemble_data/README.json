@@ -1,0 +1,112 @@
+{
+    "n_samples_per_config": 50,
+    "n_configurations": 20,
+    "total_samples": 1000,
+    "window_size": 15,
+    "base_parameters": {
+        "lambda_parent": 0.1,
+        "lambda_daughter": 30
+    },
+    "configurations": {
+        "stddev_0.10": {
+            "cluster_std_dev": 0.1,
+            "description": "r0=0.10 clusters",
+            "label": "r0=0.10"
+        },
+        "stddev_0.15": {
+            "cluster_std_dev": 0.1473684210526316,
+            "description": "r0=0.15 clusters",
+            "label": "r0=0.15"
+        },
+        "stddev_0.19": {
+            "cluster_std_dev": 0.19473684210526315,
+            "description": "r0=0.19 clusters",
+            "label": "r0=0.19"
+        },
+        "stddev_0.24": {
+            "cluster_std_dev": 0.24210526315789474,
+            "description": "r0=0.24 clusters",
+            "label": "r0=0.24"
+        },
+        "stddev_0.29": {
+            "cluster_std_dev": 0.2894736842105263,
+            "description": "r0=0.29 clusters",
+            "label": "r0=0.29"
+        },
+        "stddev_0.34": {
+            "cluster_std_dev": 0.33684210526315794,
+            "description": "r0=0.34 clusters",
+            "label": "r0=0.34"
+        },
+        "stddev_0.38": {
+            "cluster_std_dev": 0.38421052631578945,
+            "description": "r0=0.38 clusters",
+            "label": "r0=0.38"
+        },
+        "stddev_0.43": {
+            "cluster_std_dev": 0.43157894736842106,
+            "description": "r0=0.43 clusters",
+            "label": "r0=0.43"
+        },
+        "stddev_0.48": {
+            "cluster_std_dev": 0.4789473684210527,
+            "description": "r0=0.48 clusters",
+            "label": "r0=0.48"
+        },
+        "stddev_0.53": {
+            "cluster_std_dev": 0.5263157894736842,
+            "description": "r0=0.53 clusters",
+            "label": "r0=0.53"
+        },
+        "stddev_0.57": {
+            "cluster_std_dev": 0.5736842105263158,
+            "description": "r0=0.57 clusters",
+            "label": "r0=0.57"
+        },
+        "stddev_0.62": {
+            "cluster_std_dev": 0.6210526315789474,
+            "description": "r0=0.62 clusters",
+            "label": "r0=0.62"
+        },
+        "stddev_0.67": {
+            "cluster_std_dev": 0.6684210526315789,
+            "description": "r0=0.67 clusters",
+            "label": "r0=0.67"
+        },
+        "stddev_0.72": {
+            "cluster_std_dev": 0.7157894736842105,
+            "description": "r0=0.72 clusters",
+            "label": "r0=0.72"
+        },
+        "stddev_0.76": {
+            "cluster_std_dev": 0.7631578947368421,
+            "description": "r0=0.76 clusters",
+            "label": "r0=0.76"
+        },
+        "stddev_0.81": {
+            "cluster_std_dev": 0.8105263157894737,
+            "description": "r0=0.81 clusters",
+            "label": "r0=0.81"
+        },
+        "stddev_0.86": {
+            "cluster_std_dev": 0.8578947368421053,
+            "description": "r0=0.86 clusters",
+            "label": "r0=0.86"
+        },
+        "stddev_0.91": {
+            "cluster_std_dev": 0.9052631578947369,
+            "description": "r0=0.91 clusters",
+            "label": "r0=0.91"
+        },
+        "stddev_0.95": {
+            "cluster_std_dev": 0.9526315789473684,
+            "description": "r0=0.95 clusters",
+            "label": "r0=0.95"
+        },
+        "stddev_1.00": {
+            "cluster_std_dev": 1.0,
+            "description": "r0=1.00 clusters",
+            "label": "r0=1.00"
+        }
+    }
+}

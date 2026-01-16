@@ -1,0 +1,23 @@
+{
+    "config_name": "stddev_0.24",
+    "n_samples": 50,
+    "max_edge_length": 3.0,
+    "n_points": {
+        "mean": 687.2,
+        "std": 148.35727147666205,
+        "min": 441,
+        "max": 1104
+    },
+    "h0_features": {
+        "mean": 684.66,
+        "std": 148.94920073635845,
+        "min": 438,
+        "max": 1103
+    },
+    "h1_features": {
+        "mean": 105.48,
+        "std": 28.328247386663367,
+        "min": 59,
+        "max": 188
+    }
+}

@@ -1,0 +1,577 @@
+{
+    "timestamp": "2025-10-31 10:52:24",
+    "total_configurations": 24,
+    "total_samples_processed": 1200,
+    "tda_parameters": {
+        "max_edge_length_default": 3.0,
+        "config_specific": {
+            "stddev_0.2": {
+                "max_edge_length": 3.0
+            },
+            "stddev_0.4": {
+                "max_edge_length": 3.0
+            },
+            "stddev_0.6": {
+                "max_edge_length": 3.0
+            },
+            "stddev_1.0": {
+                "max_edge_length": 3.0
+            }
+        }
+    },
+    "method": "Union-Find for H0, GUDHI for H1",
+    "configurations": {
+        "stddev_0.10": {
+            "config_name": "stddev_0.10",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 661.74,
+                "std": 149.42995817439018,
+                "min": 364,
+                "max": 994
+            },
+            "h0_features": {
+                "mean": 657.5,
+                "std": 149.73980766649862,
+                "min": 360,
+                "max": 992
+            },
+            "h1_features": {
+                "mean": 93.78,
+                "std": 22.635626786108663,
+                "min": 41,
+                "max": 141
+            }
+        },
+        "stddev_0.15": {
+            "config_name": "stddev_0.15",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 679.44,
+                "std": 157.5488698785237,
+                "min": 313,
+                "max": 1131
+            },
+            "h0_features": {
+                "mean": 676.0,
+                "std": 158.19140305338973,
+                "min": 307,
+                "max": 1128
+            },
+            "h1_features": {
+                "mean": 98.52,
+                "std": 25.521943499663188,
+                "min": 51,
+                "max": 165
+            }
+        },
+        "stddev_0.19": {
+            "config_name": "stddev_0.19",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 679.38,
+                "std": 158.9626232798138,
+                "min": 382,
+                "max": 1016
+            },
+            "h0_features": {
+                "mean": 676.4,
+                "std": 159.68406307455982,
+                "min": 377,
+                "max": 1014
+            },
+            "h1_features": {
+                "mean": 101.06,
+                "std": 27.286927272963514,
+                "min": 40,
+                "max": 162
+            }
+        },
+        "stddev_0.2": {
+            "config_name": "stddev_0.2",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 662.26,
+                "std": 139.81856958215528,
+                "min": 320,
+                "max": 964
+            },
+            "h0_features": {
+                "mean": 659.2,
+                "std": 140.54920846450895,
+                "min": 316,
+                "max": 963
+            },
+            "h1_features": {
+                "mean": 97.62,
+                "std": 25.775096508063747,
+                "min": 39,
+                "max": 155
+            }
+        },
+        "stddev_0.24": {
+            "config_name": "stddev_0.24",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 687.2,
+                "std": 148.35727147666205,
+                "min": 441,
+                "max": 1104
+            },
+            "h0_features": {
+                "mean": 684.66,
+                "std": 148.94920073635845,
+                "min": 438,
+                "max": 1103
+            },
+            "h1_features": {
+                "mean": 105.48,
+                "std": 28.328247386663367,
+                "min": 59,
+                "max": 188
+            }
+        },
+        "stddev_0.29": {
+            "config_name": "stddev_0.29",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 638.38,
+                "std": 151.49929240758848,
+                "min": 278,
+                "max": 1120
+            },
+            "h0_features": {
+                "mean": 635.86,
+                "std": 152.2895938664228,
+                "min": 274,
+                "max": 1118
+            },
+            "h1_features": {
+                "mean": 99.68,
+                "std": 28.51135913982355,
+                "min": 45,
+                "max": 211
+            }
+        },
+        "stddev_0.34": {
+            "config_name": "stddev_0.34",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 624.18,
+                "std": 110.24675777545569,
+                "min": 305,
+                "max": 853
+            },
+            "h0_features": {
+                "mean": 621.76,
+                "std": 110.91538396453396,
+                "min": 299,
+                "max": 852
+            },
+            "h1_features": {
+                "mean": 102.08,
+                "std": 22.043448006153668,
+                "min": 40,
+                "max": 137
+            }
+        },
+        "stddev_0.38": {
+            "config_name": "stddev_0.38",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 643.78,
+                "std": 124.35293160999463,
+                "min": 355,
+                "max": 986
+            },
+            "h0_features": {
+                "mean": 641.78,
+                "std": 124.8727816619779,
+                "min": 350,
+                "max": 985
+            },
+            "h1_features": {
+                "mean": 107.3,
+                "std": 24.989797918350604,
+                "min": 47,
+                "max": 166
+            }
+        },
+        "stddev_0.4": {
+            "config_name": "stddev_0.4",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 622.62,
+                "std": 173.7376056010903,
+                "min": 286,
+                "max": 1148
+            },
+            "h0_features": {
+                "mean": 620.78,
+                "std": 174.1338898663899,
+                "min": 283,
+                "max": 1147
+            },
+            "h1_features": {
+                "mean": 106.78,
+                "std": 37.36163272663549,
+                "min": 42,
+                "max": 226
+            }
+        },
+        "stddev_0.43": {
+            "config_name": "stddev_0.43",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 686.9,
+                "std": 140.22257307580688,
+                "min": 461,
+                "max": 976
+            },
+            "h0_features": {
+                "mean": 685.22,
+                "std": 140.56945471901068,
+                "min": 458,
+                "max": 975
+            },
+            "h1_features": {
+                "mean": 121.26,
+                "std": 32.22099315663625,
+                "min": 69,
+                "max": 192
+            }
+        },
+        "stddev_0.48": {
+            "config_name": "stddev_0.48",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 642.62,
+                "std": 138.25945030991554,
+                "min": 357,
+                "max": 946
+            },
+            "h0_features": {
+                "mean": 641.02,
+                "std": 138.6038224581126,
+                "min": 355,
+                "max": 945
+            },
+            "h1_features": {
+                "mean": 114.42,
+                "std": 28.5076060026092,
+                "min": 50,
+                "max": 173
+            }
+        },
+        "stddev_0.53": {
+            "config_name": "stddev_0.53",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 626.78,
+                "std": 135.47151582528338,
+                "min": 354,
+                "max": 893
+            },
+            "h0_features": {
+                "mean": 625.26,
+                "std": 135.83516628620146,
+                "min": 351,
+                "max": 892
+            },
+            "h1_features": {
+                "mean": 115.68,
+                "std": 34.40665051992129,
+                "min": 41,
+                "max": 192
+            }
+        },
+        "stddev_0.57": {
+            "config_name": "stddev_0.57",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 667.3,
+                "std": 150.85015744108458,
+                "min": 363,
+                "max": 1031
+            },
+            "h0_features": {
+                "mean": 666.08,
+                "std": 151.02275854982918,
+                "min": 361,
+                "max": 1030
+            },
+            "h1_features": {
+                "mean": 127.64,
+                "std": 36.63755450354186,
+                "min": 57,
+                "max": 222
+            }
+        },
+        "stddev_0.6": {
+            "config_name": "stddev_0.6",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 632.88,
+                "std": 141.8845502512518,
+                "min": 349,
+                "max": 974
+            },
+            "h0_features": {
+                "mean": 631.68,
+                "std": 142.0896111614076,
+                "min": 348,
+                "max": 973
+            },
+            "h1_features": {
+                "mean": 121.86,
+                "std": 36.39121322517291,
+                "min": 48,
+                "max": 232
+            }
+        },
+        "stddev_0.62": {
+            "config_name": "stddev_0.62",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 629.06,
+                "std": 126.76898832127674,
+                "min": 394,
+                "max": 861
+            },
+            "h0_features": {
+                "mean": 627.64,
+                "std": 127.01712640427668,
+                "min": 391,
+                "max": 860
+            },
+            "h1_features": {
+                "mean": 122.68,
+                "std": 32.44776725754794,
+                "min": 67,
+                "max": 185
+            }
+        },
+        "stddev_0.67": {
+            "config_name": "stddev_0.67",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 626.56,
+                "std": 157.85843784859904,
+                "min": 310,
+                "max": 1016
+            },
+            "h0_features": {
+                "mean": 625.38,
+                "std": 157.9861880038885,
+                "min": 309,
+                "max": 1015
+            },
+            "h1_features": {
+                "mean": 125.16,
+                "std": 41.179295768626254,
+                "min": 53,
+                "max": 239
+            }
+        },
+        "stddev_0.72": {
+            "config_name": "stddev_0.72",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 598.04,
+                "std": 136.92245396573932,
+                "min": 303,
+                "max": 855
+            },
+            "h0_features": {
+                "mean": 596.92,
+                "std": 137.01836957138266,
+                "min": 302,
+                "max": 854
+            },
+            "h1_features": {
+                "mean": 121.2,
+                "std": 34.19005703417296,
+                "min": 43,
+                "max": 183
+            }
+        },
+        "stddev_0.76": {
+            "config_name": "stddev_0.76",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 635.1,
+                "std": 135.32098876375386,
+                "min": 312,
+                "max": 913
+            },
+            "h0_features": {
+                "mean": 633.94,
+                "std": 135.36416217005151,
+                "min": 310,
+                "max": 911
+            },
+            "h1_features": {
+                "mean": 135.06,
+                "std": 35.087553348730374,
+                "min": 58,
+                "max": 211
+            }
+        },
+        "stddev_0.81": {
+            "config_name": "stddev_0.81",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 619.32,
+                "std": 113.76931748059316,
+                "min": 319,
+                "max": 950
+            },
+            "h0_features": {
+                "mean": 618.24,
+                "std": 113.83963457425536,
+                "min": 318,
+                "max": 949
+            },
+            "h1_features": {
+                "mean": 134.18,
+                "std": 30.680736627401892,
+                "min": 58,
+                "max": 209
+            }
+        },
+        "stddev_0.86": {
+            "config_name": "stddev_0.86",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 607.16,
+                "std": 152.96317988326473,
+                "min": 293,
+                "max": 987
+            },
+            "h0_features": {
+                "mean": 606.06,
+                "std": 153.01325563492853,
+                "min": 292,
+                "max": 986
+            },
+            "h1_features": {
+                "mean": 130.48,
+                "std": 38.81661499925,
+                "min": 51,
+                "max": 232
+            }
+        },
+        "stddev_0.91": {
+            "config_name": "stddev_0.91",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 583.22,
+                "std": 151.09285754131466,
+                "min": 300,
+                "max": 935
+            },
+            "h0_features": {
+                "mean": 582.18,
+                "std": 151.12573440681768,
+                "min": 299,
+                "max": 934
+            },
+            "h1_features": {
+                "mean": 127.64,
+                "std": 39.51696344609489,
+                "min": 61,
+                "max": 221
+            }
+        },
+        "stddev_0.95": {
+            "config_name": "stddev_0.95",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 644.36,
+                "std": 120.00495989749757,
+                "min": 371,
+                "max": 883
+            },
+            "h0_features": {
+                "mean": 643.36,
+                "std": 120.00495989749757,
+                "min": 370,
+                "max": 882
+            },
+            "h1_features": {
+                "mean": 146.32,
+                "std": 33.86174242415768,
+                "min": 67,
+                "max": 229
+            }
+        },
+        "stddev_1.0": {
+            "config_name": "stddev_1.0",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 610.02,
+                "std": 121.39826852142498,
+                "min": 318,
+                "max": 862
+            },
+            "h0_features": {
+                "mean": 609.0,
+                "std": 121.4072485480171,
+                "min": 317,
+                "max": 861
+            },
+            "h1_features": {
+                "mean": 137.76,
+                "std": 34.06086317168136,
+                "min": 62,
+                "max": 213
+            }
+        },
+        "stddev_1.00": {
+            "config_name": "stddev_1.00",
+            "n_samples": 50,
+            "max_edge_length": 3.0,
+            "n_points": {
+                "mean": 608.38,
+                "std": 141.8499051814981,
+                "min": 343,
+                "max": 1225
+            },
+            "h0_features": {
+                "mean": 607.36,
+                "std": 141.8607429840969,
+                "min": 342,
+                "max": 1224
+            },
+            "h1_features": {
+                "mean": 139.36,
+                "std": 37.85485966160751,
+                "min": 69,
+                "max": 306
+            }
+        }
+    }
+}

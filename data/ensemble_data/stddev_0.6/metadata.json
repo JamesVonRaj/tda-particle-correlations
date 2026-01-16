@@ -1,0 +1,20 @@
+{
+    "configuration_name": "stddev_0.6",
+    "description": "Baseline clusters",
+    "label": "r0=0.6",
+    "n_samples": 50,
+    "parameters": {
+        "lambda_parent": 0.1,
+        "lambda_daughter": 30,
+        "cluster_std_dev": 0.6,
+        "window_size": 15,
+        "bounds_x": [
+            0,
+            15
+        ],
+        "bounds_y": [
+            0,
+            15
+        ]
+    }
+}

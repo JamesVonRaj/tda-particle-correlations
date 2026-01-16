@@ -1,0 +1,20 @@
+{
+    "configuration_name": "stddev_0.48",
+    "description": "r0=0.48 clusters",
+    "label": "r0=0.48",
+    "n_samples": 50,
+    "parameters": {
+        "lambda_parent": 0.1,
+        "lambda_daughter": 30,
+        "cluster_std_dev": 0.4789473684210527,
+        "window_size": 15,
+        "bounds_x": [
+            0,
+            15
+        ],
+        "bounds_y": [
+            0,
+            15
+        ]
+    }
+}

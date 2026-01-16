@@ -1,0 +1,24 @@
+# Requirements for Poisson Cluster Process (PCP) Analysis
+# Generated from existing Python environment
+
+# Core scientific computing
+numpy==1.26.3
+scipy==1.14.1
+
+# Visualization
+matplotlib==3.9.2
+seaborn==0.13.2
+
+# Topological Data Analysis
+gudhi==3.10.1
+ripser==0.6.12
+
+# Machine Learning (used in archive/PH.py)
+scikit-learn==1.5.2
+
+# Utilities
+tqdm==4.66.6
+
+# Testing
+pytest==8.3.4
+
