@@ -115,7 +115,7 @@ class TestComputeRipsPersistence:
         assert result['empty'] is True
         assert result['n_points'] == 0
         assert result['h0'].shape == (0, 3)
-        assert result['h1'].shape == (0, 3)
+        assert result['h1'].shape == (0, 4)  # 4 columns: birth, death, num_vertices, cycle_area
 
     def test_single_point(self):
         """Single point has no finite H0 features (no merges possible)."""
@@ -126,7 +126,7 @@ class TestComputeRipsPersistence:
         assert result['n_points'] == 1
         # Single point = no merges = no finite H0 features
         assert result['h0'].shape == (0, 3)
-        assert result['h1'].shape == (0, 3)
+        assert result['h1'].shape == (0, 4)  # 4 columns: birth, death, num_vertices, cycle_area
 
     def test_two_distant_points(self):
         """Two points beyond max_edge_length stay separate (no H0 features)."""
@@ -259,11 +259,11 @@ class TestComputeRipsPersistence:
         assert isinstance(result['max_edge_length'], float)
         assert isinstance(result['empty'], bool)
 
-        # Check array shapes have 3 columns
+        # Check array shapes: h0 has 3 columns, h1 has 4 columns
         if result['h0'].size > 0:
-            assert result['h0'].shape[1] == 3
+            assert result['h0'].shape[1] == 3  # birth, death, num_points
         if result['h1'].size > 0:
-            assert result['h1'].shape[1] == 3
+            assert result['h1'].shape[1] == 4  # birth, death, num_vertices, cycle_area
 
 
 # ===================================================================

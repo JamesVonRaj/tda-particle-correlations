@@ -1,9 +1,9 @@
 {
-    "timestamp": "2026-01-09 12:28:41",
+    "timestamp": "2026-01-16 13:19:22",
     "total_configurations": 9,
     "total_samples_processed": 450,
     "tda_parameters": {
-        "max_edge_length": 5.0,
+        "max_edge_length": 10.0,
         "method": "Union-Find for H0, GUDHI for H1"
     },
     "normalization": "unit_intensity (intensity = 1 point per unit area)",
@@ -11,7 +11,7 @@
         "r0_0.1_c_10": {
             "config_name": "r0_0.1_c_10",
             "n_samples": 50,
-            "max_edge_length": 5.0,
+            "max_edge_length": 10.0,
             "n_points": {
                 "mean": 1954.78,
                 "std": 128.93227524557224,
@@ -19,22 +19,22 @@
                 "max": 2168
             },
             "h0_features": {
-                "mean": 1953.52,
-                "std": 128.9589454051172,
+                "mean": 1953.78,
+                "std": 128.93227524557224,
                 "min": 1506,
                 "max": 2167
             },
             "h1_features": {
-                "mean": 191.84,
-                "std": 18.47848478636709,
-                "min": 140,
-                "max": 220
+                "mean": 209.68,
+                "std": 18.954091906498714,
+                "min": 155,
+                "max": 237
             }
         },
         "r0_0.1_c_5": {
             "config_name": "r0_0.1_c_5",
             "n_samples": 50,
-            "max_edge_length": 5.0,
+            "max_edge_length": 10.0,
             "n_points": {
                 "mean": 1001.1,
                 "std": 71.51454397533413,
@@ -48,16 +48,16 @@
                 "max": 1214
             },
             "h1_features": {
-                "mean": 87.14,
-                "std": 11.032696859789088,
-                "min": 72,
-                "max": 115
+                "mean": 90.84,
+                "std": 10.815470401235444,
+                "min": 74,
+                "max": 117
             }
         },
         "r0_0.1_c_50": {
             "config_name": "r0_0.1_c_50",
             "n_samples": 50,
-            "max_edge_length": 5.0,
+            "max_edge_length": 10.0,
             "n_points": {
                 "mean": 9958.78,
                 "std": 614.156927503061,
@@ -65,22 +65,22 @@
                 "max": 11143
             },
             "h0_features": {
-                "mean": 9928.44,
-                "std": 613.878331919282,
-                "min": 8611,
-                "max": 11110
+                "mean": 9957.36,
+                "std": 614.1063999015155,
+                "min": 8642,
+                "max": 11142
             },
             "h1_features": {
-                "mean": 1787.76,
-                "std": 129.55656062122057,
-                "min": 1467,
-                "max": 2051
+                "mean": 1820.28,
+                "std": 132.63710491412272,
+                "min": 1488,
+                "max": 2088
             }
         },
         "r0_0.5_c_10": {
             "config_name": "r0_0.5_c_10",
             "n_samples": 50,
-            "max_edge_length": 5.0,
+            "max_edge_length": 10.0,
             "n_points": {
                 "mean": 1939.08,
                 "std": 131.6912814122484,
@@ -94,16 +94,16 @@
                 "max": 2317
             },
             "h1_features": {
-                "mean": 442.96,
-                "std": 38.25386777830445,
-                "min": 342,
-                "max": 545
+                "mean": 445.6,
+                "std": 38.26016204879431,
+                "min": 345,
+                "max": 549
             }
         },
         "r0_0.5_c_5": {
             "config_name": "r0_0.5_c_5",
             "n_samples": 50,
-            "max_edge_length": 5.0,
+            "max_edge_length": 10.0,
             "n_points": {
                 "mean": 951.92,
                 "std": 73.80537649792188,
@@ -117,16 +117,16 @@
                 "max": 1088
             },
             "h1_features": {
-                "mean": 200.6,
-                "std": 18.967340351245873,
+                "mean": 200.86,
+                "std": 18.993693690275204,
                 "min": 166,
-                "max": 240
+                "max": 241
             }
         },
         "r0_0.5_c_50": {
             "config_name": "r0_0.5_c_50",
             "n_samples": 50,
-            "max_edge_length": 5.0,
+            "max_edge_length": 10.0,
             "n_points": {
                 "mean": 9730.24,
                 "std": 725.8040385668849,
@@ -134,22 +134,22 @@
                 "max": 11189
             },
             "h0_features": {
-                "mean": 9729.2,
-                "std": 725.7879304590289,
+                "mean": 9729.24,
+                "std": 725.8040385668849,
                 "min": 7544,
                 "max": 11188
             },
             "h1_features": {
-                "mean": 2502.72,
-                "std": 209.66297145657362,
-                "min": 1850,
-                "max": 2945
+                "mean": 2521.3,
+                "std": 209.41673763097353,
+                "min": 1865,
+                "max": 2958
             }
         },
         "r0_1.0_c_10": {
             "config_name": "r0_1.0_c_10",
             "n_samples": 50,
-            "max_edge_length": 5.0,
+            "max_edge_length": 10.0,
             "n_points": {
                 "mean": 1855.94,
                 "std": 115.18114602659588,
@@ -163,8 +163,8 @@
                 "max": 2136
             },
             "h1_features": {
-                "mean": 479.02,
-                "std": 33.79200497159054,
+                "mean": 479.12,
+                "std": 33.80925317128433,
                 "min": 413,
                 "max": 589
             }
@@ -172,7 +172,7 @@
         "r0_1.0_c_5": {
             "config_name": "r0_1.0_c_5",
             "n_samples": 50,
-            "max_edge_length": 5.0,
+            "max_edge_length": 10.0,
             "n_points": {
                 "mean": 937.54,
                 "std": 80.61493906218624,
@@ -186,16 +186,16 @@
                 "max": 1130
             },
             "h1_features": {
-                "mean": 231.04,
-                "std": 25.12605022680644,
+                "mean": 231.08,
+                "std": 25.19828565597271,
                 "min": 173,
-                "max": 280
+                "max": 281
             }
         },
         "r0_1.0_c_50": {
             "config_name": "r0_1.0_c_50",
             "n_samples": 50,
-            "max_edge_length": 5.0,
+            "max_edge_length": 10.0,
             "n_points": {
                 "mean": 9038.1,
                 "std": 714.9199465674461,
@@ -209,10 +209,10 @@
                 "max": 10592
             },
             "h1_features": {
-                "mean": 2440.24,
-                "std": 200.15659469525355,
-                "min": 2003,
-                "max": 2887
+                "mean": 2441.54,
+                "std": 200.05661298742416,
+                "min": 2005,
+                "max": 2888
             }
         }
     }

@@ -3,15 +3,20 @@
 """
 TDA Utility Functions for Persistence Computations
 
-This module provides functions for computing persistent homology 
+This module provides functions for computing persistent homology
 with additional feature information, such as the number of points
 constituting a topological feature.
+
+Optimized version using:
+- scipy.spatial.cKDTree for sparse edge finding (O(n log n + k) vs O(n²))
+- Shared distance computation between H0 and H1
 """
 
 import gudhi
 import numpy as np
 import sys
 from collections import defaultdict, deque
+from scipy.spatial import cKDTree
 from scipy.spatial.distance import pdist, squareform
 
 
@@ -196,20 +201,26 @@ def compute_rips_persistence_with_point_counts(points, max_edge_length):
     # H0 COMPUTATION (Connected Components) - Using Union-Find
     # ===================================================================
     print(f"Computing H0 (connected components) for {n_points} points...")
-    
-    # Compute pairwise distances
-    distance_matrix = squareform(pdist(points))
-    
-    # Get all edges (pairs of points) sorted by distance
-    edges = []
-    for i in range(n_points):
-        for j in range(i + 1, n_points):
-            dist = distance_matrix[i, j]
-            # Only include edges within max_edge_length
-            if dist <= max_edge_length:
-                edges.append((dist, i, j))
-    
-    edges.sort()  # Sort by distance
+
+    # Use KDTree for efficient sparse edge finding
+    # This is O(n log n + k) where k = number of edges, vs O(n²) for full matrix
+    tree = cKDTree(points)
+
+    # Find all pairs within max_edge_length using query_pairs
+    # Returns set of (i, j) pairs with i < j
+    pairs = tree.query_pairs(r=max_edge_length, output_type='ndarray')
+
+    if len(pairs) == 0:
+        edges = []
+    else:
+        # Compute distances only for the pairs we need
+        # This is much faster than computing the full n×n distance matrix
+        diffs = points[pairs[:, 0]] - points[pairs[:, 1]]
+        distances = np.sqrt(np.sum(diffs**2, axis=1))
+
+        # Build edge list: (distance, i, j)
+        edges = [(distances[k], pairs[k, 0], pairs[k, 1]) for k in range(len(pairs))]
+        edges.sort()  # Sort by distance
     
     # Initialize Union-Find
     uf = UnionFind(n_points)
@@ -253,9 +264,11 @@ def compute_rips_persistence_with_point_counts(points, max_edge_length):
     # Compute Persistence
     simplex_tree.compute_persistence()
 
-    # Pre-build sorted edge list for efficient cycle finding
-    edge_list = build_edge_list(simplex_tree)
-    print(f"Built edge list with {len(edge_list)} edges")
+    # OPTIMIZATION: Reuse the edge list from H0 computation instead of
+    # rebuilding from simplex_tree.get_filtration() which is very slow.
+    # The edges are the same, just need to ensure format matches.
+    edge_list = edges  # Already sorted by distance (= filtration value)
+    print(f"Reusing edge list with {len(edge_list)} edges")
 
     # Get persistence pairs (birth and death simplices)
     pairs = simplex_tree.persistence_pairs()
