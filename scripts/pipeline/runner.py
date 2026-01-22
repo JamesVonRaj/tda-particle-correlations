@@ -9,13 +9,15 @@ import json
 import logging
 import shutil
 import sys
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
 
 from . import stages
+from .core.progress import format_time
 
 
 class PipelineRunner:
@@ -164,6 +166,7 @@ class PipelineRunner:
         """
         self.logger = self._setup_logging()
         self.metadata['start_time'] = datetime.now().isoformat()
+        pipeline_start_time = time.time()
 
         self.logger.info("=" * 60)
         self.logger.info(f"TDA Pipeline: {self.config['experiment']['name']}")
@@ -173,19 +176,44 @@ class PipelineRunner:
             self.logger.info("DRY RUN - No changes will be made")
 
         self.logger.info(f"Output directory: {self.output_dir}")
+        self.logger.info(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
         # Copy config and set random seed
         self._copy_config()
         self._set_random_seed()
 
+        # Determine which stages will run
+        stages_to_run = [s for s in self.STAGE_ORDER if self._should_run_stage(s)]
+        total_stages = len(stages_to_run)
+
+        self.logger.info(f"Stages to run: {', '.join(stages_to_run)} ({total_stages} total)")
+
+        # Track stage timings
+        stage_timings = {}
+
         # Run each stage in order
-        for stage_name in self.STAGE_ORDER:
+        for stage_idx, stage_name in enumerate(self.STAGE_ORDER):
             if not self._should_run_stage(stage_name):
                 self.logger.info(f"\nSkipping stage: {stage_name} (disabled or not selected)")
                 continue
 
+            # Calculate progress
+            completed_stages = stage_idx
+            elapsed = time.time() - pipeline_start_time
+
+            if completed_stages > 0 and completed_stages < total_stages:
+                avg_stage_time = elapsed / completed_stages
+                remaining_stages = total_stages - completed_stages
+                eta_seconds = remaining_stages * avg_stage_time
+                eta_time = datetime.now() + timedelta(seconds=eta_seconds)
+                eta_str = f"{format_time(eta_seconds)} (est. {eta_time.strftime('%H:%M:%S')})"
+            else:
+                eta_str = "calculating..."
+
             self.logger.info(f"\n{'='*60}")
-            self.logger.info(f"Stage: {stage_name}")
+            self.logger.info(f"Stage [{stage_idx + 1}/{total_stages}]: {stage_name}")
+            self.logger.info(f"Pipeline progress: {completed_stages}/{total_stages} stages | "
+                           f"Elapsed: {format_time(elapsed)} | ETA: {eta_str}")
             self.logger.info("=" * 60)
 
             if self.dry_run:
@@ -193,11 +221,16 @@ class PipelineRunner:
                 self.metadata['stages_run'].append(stage_name)
                 continue
 
+            stage_start_time = time.time()
+
             try:
                 stage_module = getattr(stages, stage_name)
                 stage_module.run(self.config, self.output_dir, self.logger)
                 self.metadata['stages_run'].append(stage_name)
-                self.logger.info(f"Stage {stage_name} completed successfully")
+
+                stage_elapsed = time.time() - stage_start_time
+                stage_timings[stage_name] = stage_elapsed
+                self.logger.info(f"Stage {stage_name} completed in {format_time(stage_elapsed)}")
 
             except Exception as e:
                 error_msg = f"Error in stage {stage_name}: {str(e)}"
@@ -212,7 +245,10 @@ class PipelineRunner:
                     self.logger.error("Pipeline stopped due to error")
                     break
 
+        total_elapsed = time.time() - pipeline_start_time
         self.metadata['end_time'] = datetime.now().isoformat()
+        self.metadata['total_time_seconds'] = total_elapsed
+        self.metadata['stage_timings'] = stage_timings
         self._save_metadata()
 
         self.logger.info("\n" + "=" * 60)
@@ -220,7 +256,18 @@ class PipelineRunner:
             self.logger.warning(f"Pipeline completed with {len(self.metadata['errors'])} error(s)")
         else:
             self.logger.info("Pipeline completed successfully")
+
+        self.logger.info(f"Total time: {format_time(total_elapsed)}")
+        self.logger.info(f"Completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.logger.info(f"Output directory: {self.output_dir}")
+
+        # Print stage timing breakdown
+        if stage_timings:
+            self.logger.info("\nStage timing breakdown:")
+            for stage_name, stage_time in stage_timings.items():
+                pct = stage_time / total_elapsed * 100 if total_elapsed > 0 else 0
+                self.logger.info(f"  {stage_name}: {format_time(stage_time)} ({pct:.1f}%)")
+
         self.logger.info("=" * 60)
 
         return self.metadata

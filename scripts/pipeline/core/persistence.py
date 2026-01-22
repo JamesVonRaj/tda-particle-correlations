@@ -10,6 +10,7 @@ Optimizations:
 """
 
 import json
+import time
 import numpy as np
 from pathlib import Path
 from typing import Optional
@@ -19,6 +20,21 @@ import os
 
 import gudhi
 from scipy.spatial import cKDTree
+
+# Handle import for both package usage and direct testing
+try:
+    from .progress import ProgressTracker, StageProgressTracker, format_time
+except ImportError:
+    # Fallback for direct import (testing)
+    def format_time(seconds):
+        if seconds < 60:
+            return f"{seconds:.0f}s"
+        elif seconds < 3600:
+            return f"{int(seconds // 60)}m {int(seconds % 60):02d}s"
+        else:
+            return f"{int(seconds // 3600)}h {int((seconds % 3600) // 60):02d}m"
+    ProgressTracker = None
+    StageProgressTracker = None
 
 # Check for optional fastcluster
 try:
@@ -456,7 +472,24 @@ def compute_persistence_for_ensemble(
         else:
             logger.warning("fastcluster not available, using Union-Find for H0")
 
+    # Count total samples for overall progress
+    total_samples = 0
+    config_sample_counts = []
     for config_dir in config_dirs:
+        sample_files = [f for f in config_dir.iterdir()
+                       if f.name.startswith('sample_') and f.suffix == '.npy'
+                       and not f.name.endswith('_persistence.npy')]
+        config_sample_counts.append((config_dir.name, len(sample_files)))
+        total_samples += len(sample_files)
+
+    # Initialize overall progress tracking
+    overall_start_time = time.time()
+    samples_completed = 0
+
+    if logger:
+        logger.info(f"Total: {len(config_dirs)} configurations, {total_samples} samples")
+
+    for config_idx, config_dir in enumerate(config_dirs):
         config_name = config_dir.name
 
         # Get sample files
@@ -470,22 +503,45 @@ def compute_persistence_for_ensemble(
                 logger.warning(f"No sample files found in {config_dir}")
             continue
 
+        # Calculate overall progress
+        overall_percent = samples_completed / total_samples * 100 if total_samples > 0 else 0
+        elapsed = time.time() - overall_start_time
+
+        # Calculate ETA
+        if samples_completed > 0:
+            rate = samples_completed / elapsed
+            remaining_samples = total_samples - samples_completed
+            eta_seconds = remaining_samples / rate
+            eta_str = format_time(eta_seconds)
+        else:
+            eta_str = "calculating..."
+
         if logger:
-            logger.info(f"Processing {config_name}: {len(sample_files)} samples")
+            logger.info(f"[{config_idx + 1}/{len(config_dirs)}] {config_name}: "
+                       f"{len(sample_files)} samples | "
+                       f"Overall: {overall_percent:.1f}% | "
+                       f"Elapsed: {format_time(elapsed)} | ETA: {eta_str}")
+
+        config_start_time = time.time()
 
         # Process samples (parallel or sequential)
         if use_parallel:
-            # Parallel processing with joblib
+            # Parallel processing with joblib - use tqdm for visual progress
             results = Parallel(n_jobs=n_jobs)(
                 delayed(_process_single_sample)(sample_file, max_edge_length, use_fastcluster)
-                for sample_file in tqdm(sample_files, desc=f"  {config_name}", leave=False)
+                for sample_file in tqdm(sample_files, desc=f"  {config_name}", leave=False,
+                                       ncols=80, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
             )
         else:
-            # Sequential processing
+            # Sequential processing with progress bar
             results = []
-            for sample_file in tqdm(sample_files, desc=f"  {config_name}", leave=False):
+            for sample_file in tqdm(sample_files, desc=f"  {config_name}", leave=False,
+                                   ncols=80, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]'):
                 result = _process_single_sample(sample_file, max_edge_length, use_fastcluster)
                 results.append(result)
+
+        config_elapsed = time.time() - config_start_time
+        samples_completed += len(sample_files)
 
         # Aggregate statistics
         stats = {
@@ -528,7 +584,13 @@ def compute_persistence_for_ensemble(
         all_summaries[config_name] = summary
 
         if logger:
-            logger.info(f"  H0: {summary['h0_features']['mean']:.1f} +/- {summary['h0_features']['std']:.1f}")
-            logger.info(f"  H1: {summary['h1_features']['mean']:.1f} +/- {summary['h1_features']['std']:.1f}")
+            logger.info(f"  Completed in {format_time(config_elapsed)} | "
+                       f"H0: {summary['h0_features']['mean']:.1f} +/- {summary['h0_features']['std']:.1f} | "
+                       f"H1: {summary['h1_features']['mean']:.1f} +/- {summary['h1_features']['std']:.1f}")
+
+    # Final summary
+    total_elapsed = time.time() - overall_start_time
+    if logger:
+        logger.info(f"Persistence computation complete: {total_samples} samples in {format_time(total_elapsed)}")
 
     return all_summaries

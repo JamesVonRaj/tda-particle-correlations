@@ -6,10 +6,24 @@ process data in both sweep mode (varying r0) and grid mode (varying r0 and c).
 """
 
 import json
+import time
 import numpy as np
 from pathlib import Path
 from typing import Optional
 from tqdm import tqdm
+
+# Handle import for both package usage and direct testing
+try:
+    from .progress import format_time
+except ImportError:
+    # Fallback for direct import
+    def format_time(seconds):
+        if seconds < 60:
+            return f"{seconds:.0f}s"
+        elif seconds < 3600:
+            return f"{int(seconds // 60)}m {int(seconds % 60):02d}s"
+        else:
+            return f"{int(seconds // 3600)}h {int((seconds % 3600) // 60):02d}m"
 
 
 def simulate_poisson_cluster_process(
@@ -361,8 +375,20 @@ def generate_grid_ensemble(
         'configurations': []
     }
 
+    # Calculate total for progress tracking
+    n_configs = len(r0_values) * len(c_values)
+    total_samples = n_configs * n_samples
+    samples_completed = 0
+    overall_start_time = time.time()
+
+    if logger:
+        logger.info(f"Total: {n_configs} configurations, {total_samples} samples")
+
+    config_idx = 0
     for r0 in r0_values:
         for c in c_values:
+            config_idx += 1
+
             # Compute window size for this configuration
             if use_target_n_points:
                 config_window_size = compute_window_size_for_target(target_n_points, lambda_parent, c)
@@ -376,11 +402,26 @@ def generate_grid_ensemble(
             config_dir = data_dir / config_name
             config_dir.mkdir(exist_ok=True)
 
+            # Calculate overall progress and ETA
+            overall_percent = samples_completed / total_samples * 100 if total_samples > 0 else 0
+            elapsed = time.time() - overall_start_time
+
+            if samples_completed > 0:
+                rate = samples_completed / elapsed
+                remaining_samples = total_samples - samples_completed
+                eta_seconds = remaining_samples / rate
+                eta_str = format_time(eta_seconds)
+            else:
+                eta_str = "calculating..."
+
             if logger:
+                msg = f"[{config_idx}/{n_configs}] r0={r0}, c={c}: {n_samples} samples"
                 if use_target_n_points:
-                    logger.info(f"Generating {n_samples} samples for r0={r0}, c={c} (window_size={config_window_size:.2f} for target {target_n_points} points)")
-                else:
-                    logger.info(f"Generating {n_samples} samples for r0={r0}, c={c}")
+                    msg += f" (window={config_window_size:.1f})"
+                msg += f" | Overall: {overall_percent:.1f}% | Elapsed: {format_time(elapsed)} | ETA: {eta_str}"
+                logger.info(msg)
+
+            config_start_time = time.time()
 
             # Configuration metadata
             config_metadata = {
@@ -403,7 +444,8 @@ def generate_grid_ensemble(
             all_n_points = []
             all_normalized_box_sizes = []
 
-            for i in tqdm(range(n_samples), desc=f"  r0={r0}, c={c}", leave=False):
+            for i in tqdm(range(n_samples), desc=f"  r0={r0}, c={c}", leave=False,
+                        ncols=80, bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]'):
                 points, parents = simulate_poisson_cluster_process(
                     lambda_parent=lambda_parent,
                     lambda_daughter=c,
@@ -476,8 +518,22 @@ def generate_grid_ensemble(
                 'directory': config_name
             })
 
+            # Update progress tracking
+            samples_completed += n_samples
+            config_elapsed = time.time() - config_start_time
+
+            if logger:
+                logger.info(f"  Completed in {format_time(config_elapsed)} | "
+                           f"Points: {config_metadata['statistics']['n_points']['mean']:.0f} +/- "
+                           f"{config_metadata['statistics']['n_points']['std']:.0f}")
+
     # Save overall metadata
     with open(data_dir / 'README.json', 'w') as f:
         json.dump(overall_metadata, f, indent=4)
+
+    # Final summary
+    total_elapsed = time.time() - overall_start_time
+    if logger:
+        logger.info(f"Data generation complete: {total_samples} samples in {format_time(total_elapsed)}")
 
     return overall_metadata
