@@ -1,0 +1,55 @@
+# Minimal Configuration for Quick Testing
+#
+# This configuration uses minimal samples and configurations for
+# quick testing of the pipeline.
+
+experiment:
+  name: "quick_test"
+  description: "Minimal configuration for testing"
+
+data_generation:
+  enabled: true
+  mode: "sweep"
+  n_samples_per_config: 2         # Just 2 samples per config
+  window_size: 15
+  lambda_parent: 0.1
+
+  sweep:
+    r0_min: 0.2
+    r0_max: 0.8
+    n_configurations: 3           # Just 3 configurations
+    lambda_daughter: 30
+
+persistence:
+  enabled: true
+  max_edge_length: 3.0
+
+analysis:
+  enabled: true
+  death_distributions: true
+  birth_distributions: true
+  lifetime_distributions: false
+  weighted_lifetime_distributions: false
+  death_statistics_vs_r0: true
+  filtered_persistence:
+    enabled: false
+
+visualization:
+  enabled: true
+  dpi: 150
+  format: "png"
+
+  persistence_diagrams:
+    enabled: true
+    sample_id: 0
+  distribution_grids:
+    enabled: true
+  simplicial_complex_grids:
+    enabled: false
+  parameter_comparisons:
+    enabled: false
+
+pipeline:
+  random_seed: 42
+  continue_on_error: false
+  log_level: "DEBUG"

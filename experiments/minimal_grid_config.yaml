@@ -1,0 +1,51 @@
+# Minimal Grid Configuration for Quick Testing
+
+experiment:
+  name: "quick_grid_test"
+  description: "Minimal grid configuration for testing"
+
+data_generation:
+  enabled: true
+  mode: "grid"
+  n_samples_per_config: 2         # Just 2 samples per config
+
+  grid:
+    r0_values: [0.2, 0.8]         # Just 2 r0 values
+    c_values: [10, 30]            # Just 2 c values
+    lambda_parent: 0.5
+    target_n_points: 500          # Target system size
+    normalize_to_unit_intensity: true
+
+persistence:
+  enabled: true
+  grid_max_edge_length: 8.0
+
+analysis:
+  enabled: true
+  death_distributions: true
+  birth_distributions: true
+  lifetime_distributions: false
+  weighted_lifetime_distributions: false
+  death_statistics_vs_r0: false
+  filtered_persistence:
+    enabled: false
+
+visualization:
+  enabled: true
+  dpi: 150
+  format: "png"
+
+  persistence_diagrams:
+    enabled: true
+    sample_id: 0
+  distribution_grids:
+    enabled: true
+  simplicial_complex_grids:
+    enabled: false
+  parameter_comparisons:
+    enabled: false
+
+pipeline:
+  random_seed: 42
+  continue_on_error: false
+  log_level: "INFO"

@@ -1,0 +1,58 @@
+# Sweep Configuration for TDA Pipeline
+#
+# This configuration varies r0 (cluster standard deviation) while keeping
+# other parameters fixed. This is the standard "stddev sweep" analysis.
+
+experiment:
+  name: "r0_sweep"
+  description: "Varying cluster standard deviation r0 from 0.1 to 1.0"
+
+data_generation:
+  enabled: true
+  mode: "sweep"                   # Vary only r0
+  n_samples_per_config: 50        # 50 samples per configuration
+  window_size: 15                 # 15x15 observation window
+  lambda_parent: 0.1              # Parent process intensity
+
+  sweep:
+    r0_min: 0.1                   # Minimum cluster std dev
+    r0_max: 1.0                   # Maximum cluster std dev
+    n_configurations: 20          # 20 evenly spaced values
+    lambda_daughter: 30           # Mean cluster size
+
+persistence:
+  enabled: true
+  max_edge_length: 3.0            # For sweep mode
+  config_overrides: {}            # No per-config overrides
+
+analysis:
+  enabled: true
+  death_distributions: true
+  birth_distributions: true
+  lifetime_distributions: true
+  weighted_lifetime_distributions: true
+  death_statistics_vs_r0: true
+  filtered_persistence:
+    enabled: false
+    persistence_threshold: 0.1
+
+visualization:
+  enabled: true
+  dpi: 200
+  format: "png"
+
+  persistence_diagrams:
+    enabled: true
+    sample_id: 0
+  distribution_grids:
+    enabled: true
+  simplicial_complex_grids:
+    enabled: false
+    filtration_values: [0.5, 1.0, 2.0]
+  parameter_comparisons:
+    enabled: true
+
+pipeline:
+  random_seed: 42                 # For reproducibility
+  continue_on_error: false
+  log_level: "INFO"

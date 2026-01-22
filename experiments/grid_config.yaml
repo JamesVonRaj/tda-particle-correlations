@@ -1,0 +1,58 @@
+# Grid Configuration for TDA Pipeline
+#
+# This configuration creates a 3x3 grid varying both r0 (cluster standard
+# deviation) and c (mean cluster size). Data is normalized to unit intensity.
+
+experiment:
+  name: "r0_c_grid"
+  description: "3x3 grid of r0 and c values with unit intensity normalization"
+
+data_generation:
+  enabled: true
+  mode: "grid"                    # Vary r0 and c
+  n_samples_per_config: 50        # 50 samples per configuration
+
+  grid:
+    r0_values: [0.1, 0.2, 0.3, 0.4, 0.5]    # Cluster standard deviations
+    c_values: [5, 10, 25]         # Mean cluster sizes
+    lambda_parent: 0.5            # Parent process intensity
+    target_n_points: 50000         # Target system size (window computed per config)
+    # initial_window_size: 20     # Alternative: fixed window size for all configs
+    normalize_to_unit_intensity: true
+
+persistence:
+  enabled: true
+  grid_max_edge_length: 10.0      # Larger for normalized data
+  config_overrides: {}
+
+analysis:
+  enabled: true
+  death_distributions: true
+  birth_distributions: true
+  lifetime_distributions: true
+  weighted_lifetime_distributions: true
+  death_statistics_vs_r0: false   # Not applicable for grid
+  filtered_persistence:
+    enabled: false
+    persistence_threshold: 0.1
+
+visualization:
+  enabled: true
+  dpi: 200
+  format: "png"
+
+  persistence_diagrams:
+    enabled: true
+    sample_id: 0
+  distribution_grids:
+    enabled: true
+  simplicial_complex_grids:
+    enabled: false
+    filtration_values: [1.0, 2.0, 4.0]
+  parameter_comparisons:
+    enabled: true
+
+pipeline:
+  random_seed: 42
+  continue_on_error: false
+  log_level: "INFO"
