@@ -36,6 +36,10 @@ def run(config: dict, output_dir: Path, logger: logging.Logger):
     else:  # grid
         max_edge_length = pers.get('grid_max_edge_length', 10.0)
 
+    # Get parallelization and optimization settings
+    n_jobs = pers.get('n_jobs', -1)  # Default to all CPUs
+    use_fastcluster = pers.get('use_fastcluster', False)
+
     logger.info(f"Computing persistence with max_edge_length = {max_edge_length}")
 
     data_dir = output_dir / 'data'
@@ -46,6 +50,8 @@ def run(config: dict, output_dir: Path, logger: logging.Logger):
         data_dir=data_dir,
         max_edge_length=max_edge_length,
         mode=mode,
+        n_jobs=n_jobs,
+        use_fastcluster=use_fastcluster,
         logger=logger
     )
 

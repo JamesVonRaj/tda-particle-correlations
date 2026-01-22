@@ -267,6 +267,262 @@ class TestComputeRipsPersistence:
 
 
 # ===================================================================
+# H0 Implementation Equivalence Tests (Union-Find vs fastcluster)
+# ===================================================================
+
+class TestH0Equivalence:
+    """Tests that fastcluster and Union-Find produce equivalent H0 results."""
+
+    @pytest.fixture
+    def pipeline_module(self):
+        """Import the pipeline persistence module."""
+        sys.path.insert(0, 'scripts/pipeline/core')
+        import persistence as pipeline_persistence
+        return pipeline_persistence
+
+    def _sort_h0_for_comparison(self, h0):
+        """Sort H0 array by death time, then by num_points for consistent comparison."""
+        if h0.shape[0] == 0:
+            return h0
+        return h0[np.lexsort((h0[:, 2], h0[:, 1]))]
+
+    def test_h0_equivalence_two_points(self, pipeline_module):
+        """Two close points: both methods should give same death times and cluster sizes."""
+        if not pipeline_module.HAS_FASTCLUSTER:
+            pytest.skip("fastcluster not installed")
+
+        points = np.array([[0.0, 0.0], [0.5, 0.0]])
+        max_edge = 1.0
+
+        h0_uf, _ = pipeline_module.compute_h0_unionfind(points, max_edge)
+        h0_fc, _ = pipeline_module.compute_h0_fastcluster(points, max_edge)
+
+        assert h0_uf.shape[0] == h0_fc.shape[0]
+
+        if h0_uf.shape[0] > 0:
+            h0_uf_sorted = self._sort_h0_for_comparison(h0_uf)
+            h0_fc_sorted = self._sort_h0_for_comparison(h0_fc)
+
+            # Death times should match
+            np.testing.assert_allclose(h0_uf_sorted[:, 1], h0_fc_sorted[:, 1], rtol=1e-10)
+            # Cluster sizes should match
+            np.testing.assert_array_equal(h0_uf_sorted[:, 2], h0_fc_sorted[:, 2])
+
+    def test_h0_equivalence_linear_points(self, pipeline_module):
+        """Three collinear points: verify death times and cluster sizes."""
+        if not pipeline_module.HAS_FASTCLUSTER:
+            pytest.skip("fastcluster not installed")
+
+        points = np.array([
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [2.0, 0.0]
+        ])
+        max_edge = 3.0
+
+        h0_uf, _ = pipeline_module.compute_h0_unionfind(points, max_edge)
+        h0_fc, _ = pipeline_module.compute_h0_fastcluster(points, max_edge)
+
+        assert h0_uf.shape[0] == h0_fc.shape[0] == 2
+
+        h0_uf_sorted = self._sort_h0_for_comparison(h0_uf)
+        h0_fc_sorted = self._sort_h0_for_comparison(h0_fc)
+
+        # Death times should match
+        np.testing.assert_allclose(h0_uf_sorted[:, 1], h0_fc_sorted[:, 1], rtol=1e-10)
+        # Cluster sizes should match
+        np.testing.assert_array_equal(h0_uf_sorted[:, 2], h0_fc_sorted[:, 2])
+        # Verify expected cluster sizes: first merge gives 2, second gives 3
+        assert h0_uf_sorted[0, 2] == 2
+        assert h0_uf_sorted[1, 2] == 3
+
+    def test_h0_equivalence_square(self, pipeline_module):
+        """Four points in a square: verify death times and cluster sizes."""
+        if not pipeline_module.HAS_FASTCLUSTER:
+            pytest.skip("fastcluster not installed")
+
+        points = np.array([
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [0.0, 1.0]
+        ])
+        max_edge = 2.0
+
+        h0_uf, _ = pipeline_module.compute_h0_unionfind(points, max_edge)
+        h0_fc, _ = pipeline_module.compute_h0_fastcluster(points, max_edge)
+
+        assert h0_uf.shape[0] == h0_fc.shape[0] == 3
+
+        h0_uf_sorted = self._sort_h0_for_comparison(h0_uf)
+        h0_fc_sorted = self._sort_h0_for_comparison(h0_fc)
+
+        # Death times should match
+        np.testing.assert_allclose(h0_uf_sorted[:, 1], h0_fc_sorted[:, 1], rtol=1e-10)
+        # Cluster sizes should match
+        np.testing.assert_array_equal(h0_uf_sorted[:, 2], h0_fc_sorted[:, 2])
+        # Final merge should have all 4 points
+        assert h0_uf_sorted[-1, 2] == 4
+
+    def test_h0_equivalence_random_points(self, pipeline_module):
+        """Random points: verify death times and cluster sizes match."""
+        if not pipeline_module.HAS_FASTCLUSTER:
+            pytest.skip("fastcluster not installed")
+
+        np.random.seed(42)
+        points = np.random.rand(20, 2) * 5.0
+        max_edge = 3.0
+
+        h0_uf, _ = pipeline_module.compute_h0_unionfind(points, max_edge)
+        h0_fc, _ = pipeline_module.compute_h0_fastcluster(points, max_edge)
+
+        assert h0_uf.shape[0] == h0_fc.shape[0]
+
+        if h0_uf.shape[0] > 0:
+            h0_uf_sorted = self._sort_h0_for_comparison(h0_uf)
+            h0_fc_sorted = self._sort_h0_for_comparison(h0_fc)
+
+            # Death times should match
+            np.testing.assert_allclose(h0_uf_sorted[:, 1], h0_fc_sorted[:, 1], rtol=1e-10)
+            # Cluster sizes should match
+            np.testing.assert_array_equal(h0_uf_sorted[:, 2], h0_fc_sorted[:, 2])
+
+    def test_h0_equivalence_larger_random(self, pipeline_module):
+        """Larger random point set: stress test equivalence."""
+        if not pipeline_module.HAS_FASTCLUSTER:
+            pytest.skip("fastcluster not installed")
+
+        np.random.seed(123)
+        points = np.random.rand(100, 2) * 10.0
+        max_edge = 5.0
+
+        h0_uf, _ = pipeline_module.compute_h0_unionfind(points, max_edge)
+        h0_fc, _ = pipeline_module.compute_h0_fastcluster(points, max_edge)
+
+        assert h0_uf.shape[0] == h0_fc.shape[0]
+
+        h0_uf_sorted = self._sort_h0_for_comparison(h0_uf)
+        h0_fc_sorted = self._sort_h0_for_comparison(h0_fc)
+
+        # Death times should match
+        np.testing.assert_allclose(h0_uf_sorted[:, 1], h0_fc_sorted[:, 1], rtol=1e-10)
+        # Cluster sizes should match
+        np.testing.assert_array_equal(h0_uf_sorted[:, 2], h0_fc_sorted[:, 2])
+
+    def test_compute_persistence_full_equivalence(self, pipeline_module):
+        """Full compute_persistence: verify H0 and H1 match between methods."""
+        if not pipeline_module.HAS_FASTCLUSTER:
+            pytest.skip("fastcluster not installed")
+
+        np.random.seed(456)
+        points = np.random.rand(50, 2) * 8.0
+        max_edge = 4.0
+
+        result_uf = pipeline_module.compute_persistence(points, max_edge, use_fastcluster=False)
+        result_fc = pipeline_module.compute_persistence(points, max_edge, use_fastcluster=True)
+
+        # Same structure
+        assert result_uf['n_points'] == result_fc['n_points']
+        assert result_uf['h0'].shape[0] == result_fc['h0'].shape[0]
+        assert result_uf['h1'].shape[0] == result_fc['h1'].shape[0]
+
+        # H0: death times and cluster sizes should match
+        h0_uf_sorted = self._sort_h0_for_comparison(result_uf['h0'])
+        h0_fc_sorted = self._sort_h0_for_comparison(result_fc['h0'])
+        np.testing.assert_allclose(h0_uf_sorted[:, 1], h0_fc_sorted[:, 1], rtol=1e-10)
+        np.testing.assert_array_equal(h0_uf_sorted[:, 2], h0_fc_sorted[:, 2])
+
+        # H1: should be identical (same code path for both methods)
+        if result_uf['h1'].shape[0] > 0:
+            # Sort by birth time, then death time
+            h1_uf_sorted = result_uf['h1'][np.lexsort((result_uf['h1'][:, 1], result_uf['h1'][:, 0]))]
+            h1_fc_sorted = result_fc['h1'][np.lexsort((result_fc['h1'][:, 1], result_fc['h1'][:, 0]))]
+
+            # Birth and death times should match exactly
+            np.testing.assert_allclose(h1_uf_sorted[:, 0], h1_fc_sorted[:, 0], rtol=1e-10)
+            np.testing.assert_allclose(h1_uf_sorted[:, 1], h1_fc_sorted[:, 1], rtol=1e-10)
+            # Cycle vertex counts should match
+            np.testing.assert_array_equal(h1_uf_sorted[:, 2], h1_fc_sorted[:, 2])
+            # Cycle areas should match
+            np.testing.assert_allclose(h1_uf_sorted[:, 3], h1_fc_sorted[:, 3], rtol=1e-10)
+
+
+# ===================================================================
+# H1 Cycle Area Tests
+# ===================================================================
+
+class TestH1CycleAreas:
+    """Tests for H1 cycle area computation."""
+
+    @pytest.fixture
+    def pipeline_module(self):
+        """Import the pipeline persistence module."""
+        sys.path.insert(0, 'scripts/pipeline/core')
+        import persistence as pipeline_persistence
+        return pipeline_persistence
+
+    def test_square_cycle_area(self, pipeline_module):
+        """Unit square should have H1 cycle with area ~1.0."""
+        points = np.array([
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [0.0, 1.0]
+        ])
+        max_edge = 2.0
+
+        result = pipeline_module.compute_persistence(points, max_edge)
+
+        # Should have at least one H1 feature (the square loop)
+        assert result['h1'].shape[0] >= 1
+
+        # The cycle area should be approximately 1.0 (unit square)
+        # Note: The exact area depends on which cycle is detected
+        areas = result['h1'][:, 3]
+        assert np.any(np.isclose(areas, 1.0, rtol=0.1))
+
+    def test_rectangle_cycle_area(self, pipeline_module):
+        """Rectangle 2x1 should have H1 cycle with area ~2.0."""
+        points = np.array([
+            [0.0, 0.0],
+            [2.0, 0.0],
+            [2.0, 1.0],
+            [0.0, 1.0]
+        ])
+        max_edge = 3.0
+
+        result = pipeline_module.compute_persistence(points, max_edge)
+
+        assert result['h1'].shape[0] >= 1
+        areas = result['h1'][:, 3]
+        # Area should be approximately 2.0
+        assert np.any(np.isclose(areas, 2.0, rtol=0.1))
+
+    def test_polygon_area_function(self, pipeline_module):
+        """Test the polygon_area function directly."""
+        # Unit square
+        square = np.array([
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [0.0, 1.0]
+        ])
+        assert np.isclose(pipeline_module.polygon_area(square), 1.0)
+
+        # Right triangle with legs 3 and 4 -> area = 6
+        triangle = np.array([
+            [0.0, 0.0],
+            [3.0, 0.0],
+            [0.0, 4.0]
+        ])
+        assert np.isclose(pipeline_module.polygon_area(triangle), 6.0)
+
+        # Degenerate cases
+        assert pipeline_module.polygon_area(np.array([[0, 0]])) == 0.0
+        assert pipeline_module.polygon_area(np.array([[0, 0], [1, 1]])) == 0.0
+
+
+# ===================================================================
 # Run tests if executed directly
 # ===================================================================
 

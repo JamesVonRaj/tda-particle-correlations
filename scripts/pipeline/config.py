@@ -41,7 +41,9 @@ DEFAULTS = {
         'enabled': True,
         'max_edge_length': 3.0,
         'grid_max_edge_length': 10.0,
-        'config_overrides': {}
+        'config_overrides': {},
+        'n_jobs': -1,               # Number of parallel jobs (-1 = all CPUs, 1 = sequential)
+        'use_fastcluster': False    # Use fastcluster for H0 computation (requires fastcluster package)
     },
     'analysis': {
         'enabled': True,
@@ -276,6 +278,11 @@ def get_config_summary(config: dict) -> str:
             lines.append(f"  max_edge_length: {pers['max_edge_length']}")
         else:
             lines.append(f"  max_edge_length: {pers['grid_max_edge_length']}")
+        n_jobs = pers.get('n_jobs', -1)
+        jobs_str = "all CPUs" if n_jobs == -1 else f"{n_jobs} workers"
+        lines.append(f"  Parallelization: {jobs_str}")
+        if pers.get('use_fastcluster', False):
+            lines.append(f"  H0 method: fastcluster")
     else:
         lines.append("\nPersistence: disabled")
 

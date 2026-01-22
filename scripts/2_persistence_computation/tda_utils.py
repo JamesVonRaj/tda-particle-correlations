@@ -85,6 +85,9 @@ def find_cycle_at_birth(edge_list, birth_edge, birth_filt):
     We find this cycle by doing BFS from one endpoint of the birth_edge to
     the other, using only edges that existed before the birth_edge was added.
 
+    Uses an optimized BFS that tracks parent pointers instead of full paths,
+    avoiding O(path_length) memory allocation per queue operation.
+
     Args:
         edge_list: Pre-sorted list of (filt, v1, v2) tuples from build_edge_list()
         birth_edge: The edge (as list of 2 vertex indices) that creates the cycle
@@ -94,7 +97,7 @@ def find_cycle_at_birth(edge_list, birth_edge, birth_filt):
         list: Ordered list of vertex indices forming the cycle, or None if not found
     """
     v1, v2 = birth_edge
-    birth_edge_set = set(birth_edge)
+    birth_edge_set = frozenset(birth_edge)  # frozenset is faster for comparison
 
     # Build graph from pre-computed edge list
     # Only include edges with filt < birth_filt, or equal but not the birth edge
@@ -103,22 +106,29 @@ def find_cycle_at_birth(edge_list, birth_edge, birth_filt):
     for filt, a, b in edge_list:
         if filt > birth_filt:
             break  # Edge list is sorted, so we can stop here
-        if filt < birth_filt or {a, b} != birth_edge_set:
+        if filt < birth_filt or frozenset((a, b)) != birth_edge_set:
             graph[a].append(b)
             graph[b].append(a)
 
-    # BFS from v1 to v2 to find the shortest path
-    queue = deque([(v1, [v1])])
-    visited = {v1}
+    # BFS with parent tracking instead of path copying
+    parent = {v1: None}
+    queue = deque([v1])
 
     while queue:
-        current, path = queue.popleft()
+        current = queue.popleft()
         if current == v2:
-            return path  # Found path; this + birth_edge forms the cycle
+            # Reconstruct path from parent pointers
+            path = []
+            node = current
+            while node is not None:
+                path.append(node)
+                node = parent[node]
+            return path[::-1]  # Reverse to get v1 -> v2 order
+
         for neighbor in graph[current]:
-            if neighbor not in visited:
-                visited.add(neighbor)
-                queue.append((neighbor, path + [neighbor]))
+            if neighbor not in parent:
+                parent[neighbor] = current
+                queue.append(neighbor)
 
     return None  # No path found (shouldn't happen for valid H1)
 
